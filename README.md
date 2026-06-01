@@ -30,13 +30,40 @@ npm run dev
 # click "Run the Presses" to fetch articles
 ```
 
-## Server deployment
+## Server deployment (Hetzner)
+
+Runs as a self-contained **Docker Compose** service, fronted by the Caddy
+instance in the [`hetzner-server`](https://github.com/mmsge/hetzner-server) repo
+— matching the convention used by the other services on the box.
+
+| Key | Value |
+|-----|-------|
+| Domain | `thegoodtimes.msge.no` |
+| Internal port | `4008` (published on `0.0.0.0` for the Caddy bridge) |
+| Repo path on server | `/var/www/thegoodtimes` |
+| Persistence | SQLite at `./data/goodnews.db` (bind-mounted to `/data`) |
+
+First-time setup on the server:
 
 ```bash
-make deploy    # git pull + install + build + restart
-make dev       # local hot-reload dev server
-make stop      # stop the background server
-make logs      # tail server logs
+git clone https://github.com/mmsge/ndccopenhagen2026 /var/www/thegoodtimes
+cd /var/www/thegoodtimes
+make deploy
 ```
 
-`make deploy` prefers **PM2** if installed; falls back to **nohup** otherwise.
+The Caddy block for `thegoodtimes.msge.no` is in the `hetzner-server` repo. If
+the DNS A record doesn't exist yet, create it on the server with
+`make add-subdomain SUBDOMAIN=thegoodtimes DOMAIN=msge.no PORT=4008`. Once both
+are in place the service is reachable over HTTPS.
+
+```bash
+make deploy    # git pull + docker compose up -d --build  (run on server)
+make logs      # follow container logs
+make status    # show container status
+make restart   # recreate the container
+make down      # stop and remove the container
+make dev       # local hot-reload dev server (no Docker)
+```
+
+Open the site and click **"Run the Presses"** to fetch the first batch of
+articles. The SQLite database persists across rebuilds via the `./data` volume.

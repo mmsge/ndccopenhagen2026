@@ -1,0 +1,20 @@
+# The Good Times — runs standalone on the Hetzner server, fronted by the
+# Caddy instance in the `hetzner-server` repo (domain: thegoodtimes.msge.no).
+#
+# Caddy reaches this container via the Docker bridge gateway 172.18.0.1:4008,
+# so the port is published on 0.0.0.0 (not 127.0.0.1). The Hetzner firewall
+# only exposes 22/80/443 externally, so 4008 stays internal.
+
+services:
+  thegoodtimes:
+    build: .
+    container_name: thegoodtimes
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:4008:4008"
+    environment:
+      PORT: 4008
+      GOODNEWS_DB: /data/goodnews.db
+    volumes:
+      # SQLite state persists across rebuilds. Dir mount so WAL siblings work.
+      - ./data:/data

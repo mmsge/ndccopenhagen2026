@@ -1,9 +1,16 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { articles } from "./schema";
+import fs from "fs";
 import path from "path";
 
-const DB_PATH = path.join(process.cwd(), "data", "goodnews.db");
+// Location of the SQLite file. Override with GOODNEWS_DB in production
+// (e.g. a mounted volume at /data/goodnews.db); defaults to ./data locally.
+const DB_PATH =
+  process.env.GOODNEWS_DB || path.join(process.cwd(), "data", "goodnews.db");
+
+// Make sure the parent directory exists so a fresh deploy can create the file.
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const sqlite = new Database(DB_PATH);
 
