@@ -13,10 +13,10 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
   && rm -rf /var/lib/apt/lists/*
 
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install deps first for better layer caching.
+# Install deps first for better layer caching. NODE_ENV stays unset here so
+# npm installs devDependencies (tailwind, typescript) needed for the build.
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -25,8 +25,11 @@ COPY . .
 RUN npm run build \
   && npm prune --omit=dev
 
+# Runtime config. NODE_ENV flips to production only now — after the build —
+# so `next start` runs in production mode without starving the build of dev deps.
 # SQLite lives on a mounted volume; see docker-compose.yml.
-ENV PORT=4008 \
+ENV NODE_ENV=production \
+    PORT=4008 \
     GOODNEWS_DB=/data/goodnews.db
 RUN mkdir -p /data
 
