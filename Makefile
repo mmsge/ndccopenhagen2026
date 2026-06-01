@@ -1,4 +1,4 @@
-PORT ?= 4004
+PORT ?= 4008
 
 .PHONY: deploy up down restart build logs status stop dev help
 
@@ -7,8 +7,8 @@ help:        ## Show this help
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
 # ── Server (Docker Compose) ───────────────────────────────────────────────────
-# On the Hetzner box the repo lives at /var/www/thegoodmark.
-# Caddy (in the hetzner-server repo) proxies thegoodmark.msge.no → 4004.
+# On the Hetzner box the repo lives at /var/www/thegoodtimes.
+# Caddy (in the hetzner-server repo) proxies thegoodtimes.msge.no → 4008.
 
 deploy:      ## Pull latest code, rebuild image, and restart (run on server)
 	git pull --ff-only

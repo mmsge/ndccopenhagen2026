@@ -38,21 +38,23 @@ instance in the [`hetzner-server`](https://github.com/mmsge/hetzner-server) repo
 
 | Key | Value |
 |-----|-------|
-| Domain | `thegoodmark.msge.no` |
-| Internal port | `4004` (published on `0.0.0.0` for the Caddy bridge) |
-| Repo path on server | `/var/www/thegoodmark` |
+| Domain | `thegoodtimes.msge.no` |
+| Internal port | `4008` (published on `0.0.0.0` for the Caddy bridge) |
+| Repo path on server | `/var/www/thegoodtimes` |
 | Persistence | SQLite at `./data/goodnews.db` (bind-mounted to `/data`) |
 
 First-time setup on the server:
 
 ```bash
-git clone https://github.com/mmsge/ndccopenhagen2026 /var/www/thegoodmark
-cd /var/www/thegoodmark
+git clone https://github.com/mmsge/ndccopenhagen2026 /var/www/thegoodtimes
+cd /var/www/thegoodtimes
 make deploy
 ```
 
-The Caddy block and DNS for `thegoodmark.msge.no` are already provisioned in the
-`hetzner-server` repo, so the service is reachable over HTTPS once it's up.
+The Caddy block for `thegoodtimes.msge.no` is in the `hetzner-server` repo. If
+the DNS A record doesn't exist yet, create it on the server with
+`make add-subdomain SUBDOMAIN=thegoodtimes DOMAIN=msge.no PORT=4008`. Once both
+are in place the service is reachable over HTTPS.
 
 ```bash
 make deploy    # git pull + docker compose up -d --build  (run on server)

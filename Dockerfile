@@ -26,11 +26,11 @@ RUN npm run build \
   && npm prune --omit=dev
 
 # SQLite lives on a mounted volume; see docker-compose.yml.
-ENV PORT=4004 \
+ENV PORT=4008 \
     GOODNEWS_DB=/data/goodnews.db
 RUN mkdir -p /data
 
-EXPOSE 4004
+EXPOSE 4008
 
 # Bind to 0.0.0.0 so Caddy can reach the container via the Docker bridge.
-CMD ["sh", "-c", "npm run start -- -H 0.0.0.0 -p ${PORT:-4004}"]
+CMD ["sh", "-c", "npm run start -- -H 0.0.0.0 -p ${PORT:-4008}"]
