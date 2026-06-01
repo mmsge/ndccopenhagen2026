@@ -1,54 +1,42 @@
-PORT ?= 3000
+PORT ?= 4004
 
-.PHONY: deploy restart start stop dev logs install build
+.PHONY: deploy up down restart build logs status stop dev help
 
-# Pull latest code, rebuild, and restart the server
-deploy:
-	git pull
+help:        ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+
+# ── Server (Docker Compose) ───────────────────────────────────────────────────
+# On the Hetzner box the repo lives at /var/www/thegoodmark.
+# Caddy (in the hetzner-server repo) proxies thegoodmark.msge.no → 4004.
+
+deploy:      ## Pull latest code, rebuild image, and restart (run on server)
+	git pull --ff-only
+	docker compose up -d --build
+
+up:          ## Start the container in the background
+	docker compose up -d
+
+down:        ## Stop and remove the container
+	docker compose down
+
+restart:     ## Recreate the container
+	docker compose down && docker compose up -d
+
+build:       ## Build the image without starting
+	docker compose build
+
+logs:        ## Follow container logs
+	docker compose logs -f
+
+status:      ## Show container status
+	docker compose ps
+
+stop:        ## Stop the container (keep it around)
+	docker compose stop
+
+# ── Local development (no Docker) ─────────────────────────────────────────────
+
+dev:         ## Local hot-reload dev server
 	npm install
-	npm run build
-	$(MAKE) restart
-
-# Build without pulling (useful after manual changes)
-build:
-	npm install
-	npm run build
-
-# Restart the server process (PM2 if available, nohup fallback)
-restart:
-	@if command -v pm2 >/dev/null 2>&1; then \
-		pm2 restart good-times 2>/dev/null \
-		  || PORT=$(PORT) pm2 start npm --name good-times -- start; \
-		echo "Started with PM2 on port $(PORT)"; \
-	else \
-		pkill -f "next start" 2>/dev/null || true; \
-		sleep 1; \
-		PORT=$(PORT) nohup npm start > server.log 2>&1 & echo $$! > server.pid; \
-		echo "Started in background on port $(PORT) (PID $$(cat server.pid))"; \
-		echo "Logs: tail -f server.log"; \
-	fi
-
-# Start in the foreground — useful inside tmux / screen
-start:
-	PORT=$(PORT) npm start
-
-# Stop the server
-stop:
-	@if command -v pm2 >/dev/null 2>&1; then \
-		pm2 stop good-times 2>/dev/null || true; \
-	elif [ -f server.pid ]; then \
-		kill $$(cat server.pid) 2>/dev/null && rm -f server.pid || true; \
-	fi
-	@echo "Server stopped"
-
-# Tail server logs
-logs:
-	@if command -v pm2 >/dev/null 2>&1; then \
-		pm2 logs good-times; \
-	else \
-		tail -f server.log; \
-	fi
-
-# Local development with hot-reload
-dev:
 	npm run dev
