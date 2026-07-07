@@ -5,6 +5,8 @@
 # so the port is published on 0.0.0.0 (not 127.0.0.1). The Hetzner firewall
 # only exposes 22/80/443 externally, so 4008 stays internal.
 
+name: thegoodtimes
+
 services:
   thegoodtimes:
     build: .

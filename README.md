@@ -40,14 +40,14 @@ instance in the [`hetzner-server`](https://github.com/mmsge/hetzner-server) repo
 |-----|-------|
 | Domain | `thegoodtimes.msge.no` |
 | Internal port | `4008` (published on `0.0.0.0` for the Caddy bridge) |
-| Repo path on server | `/var/www/thegoodtimes` |
+| Repo path on server | `/srv/thegoodtimes` |
 | Persistence | SQLite at `./data/goodnews.db` (bind-mounted to `/data`) |
 
 First-time setup on the server:
 
 ```bash
-git clone https://github.com/mmsge/ndccopenhagen2026 /var/www/thegoodtimes
-cd /var/www/thegoodtimes
+git clone https://github.com/mmsge/ndccopenhagen2026 /srv/thegoodtimes
+cd /srv/thegoodtimes
 make deploy
 ```
 
