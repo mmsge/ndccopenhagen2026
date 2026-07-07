@@ -7,7 +7,7 @@ help:        ## Show this help
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
 # ── Server (Docker Compose) ───────────────────────────────────────────────────
-# On the Hetzner box the repo lives at /var/www/thegoodtimes.
+# On the Hetzner box the repo lives at /srv/thegoodtimes.
 # Caddy (in the hetzner-server repo) proxies thegoodtimes.msge.no → 4008.
 
 deploy:      ## Pull latest code, rebuild image, and restart (run on server)
