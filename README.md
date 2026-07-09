@@ -1,5 +1,7 @@
 # The Good Times — NDC Copenhagen 2026
 
+[![deployed](https://img.shields.io/endpoint?url=https://utrulla.msge.no/badge/mmsge/ndccopenhagen2026)](https://thegoodtimes.msge.no)
+
 > *"All the news that's glad to print."*
 
 A good-news gazette that pulls RSS feeds from major outlets, scores each article's positivity 0–100 using local sentiment analysis, and shows only the happy stories. Built as the capstone demo for **Vibe Coding for Production** at NDC Copenhagen 2026.
