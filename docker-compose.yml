@@ -20,3 +20,9 @@ services:
     volumes:
       # SQLite state persists across rebuilds. Dir mount so WAL siblings work.
       - ./data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4008/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
