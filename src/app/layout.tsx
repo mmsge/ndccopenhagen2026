@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Newsreader, Space_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/app/components/NavBar";
+import { PAGE_DATES } from "@/lib/page-dates";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -24,12 +25,38 @@ const spaceMono = Space_Mono({
 export const metadata: Metadata = {
   title: "The Good Times",
   description: "All the news that's glad to print.",
+  other: {
+    date: PAGE_DATES.created,
+    "last-modified": PAGE_DATES.modified,
+  },
+};
+
+// Site-level created/modified JSON-LD, from git history (see
+// src/lib/page-dates.ts / scripts/generate-page-dates.sh). Same pattern as
+// msge-no (ADR 0004) and hetzner-server (ADR 0015). `article:*` isn't
+// representable via the typed Metadata `openGraph` fields without also
+// claiming og:type=article, so it's rendered directly — React hoists
+// <meta>/<script> tags into <head> regardless of where they render.
+const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "The Good Times",
+  url: "https://thegoodtimes.msge.no/",
+  dateCreated: PAGE_DATES.created,
+  datePublished: PAGE_DATES.created,
+  dateModified: PAGE_DATES.modified,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${bricolage.variable} ${newsreader.variable} ${spaceMono.variable}`}>
       <body>
+        <meta property="article:published_time" content={PAGE_DATES.created} />
+        <meta property="article:modified_time" content={PAGE_DATES.modified} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\\u003c") }}
+        />
         <div className="gn-root">
           <NavBar />
           {children}

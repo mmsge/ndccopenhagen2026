@@ -12,6 +12,7 @@ help:        ## Show this help
 
 deploy:      ## Pull latest code, rebuild image, and restart (run on server)
 	git pull --ff-only
+	scripts/generate-page-dates.sh || echo "WARN: page-dates generation failed"
 	docker compose up -d --build
 
 up:          ## Start the container in the background
