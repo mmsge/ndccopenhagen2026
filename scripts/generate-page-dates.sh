@@ -10,9 +10,9 @@
 # modified = author date of the newest commit touching the repo
 #
 # Site-level granularity (one pair for the whole site): this is a single-app
-# repo (Next.js), unlike hetzner-server's multi-app layout, so the "app
+# repo (Next.js), unlike naustet-server's multi-app layout, so the "app
 # directory" pathspec is just the repo root. Same pattern as msge-no (ADR
-# 0004) and hetzner-server (ADR 0015). NOTE: a shallow clone (CI, sandbox
+# 0004) and naustet-server (ADR 0015). NOTE: a shallow clone (CI, sandbox
 # checkouts) collapses dates onto the latest commit; the server checkout is
 # a full clone.
 set -eu
