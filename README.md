@@ -35,7 +35,7 @@ npm run dev
 ## Server deployment (Hetzner)
 
 Runs as a self-contained **Docker Compose** service, fronted by the Caddy
-instance in the [`hetzner-server`](https://github.com/mmsge/hetzner-server) repo
+instance in the [`naustet-server`](https://github.com/mmsge/naustet-server) repo
 — matching the convention used by the other services on the box.
 
 | Key | Value |
@@ -53,7 +53,7 @@ cd /srv/thegoodtimes
 make deploy
 ```
 
-The Caddy block for `thegoodtimes.msge.no` is in the `hetzner-server` repo. If
+The Caddy block for `thegoodtimes.msge.no` is in the `naustet-server` repo. If
 the DNS A record doesn't exist yet, create it on the server with
 `make add-subdomain SUBDOMAIN=thegoodtimes DOMAIN=msge.no PORT=4008`. Once both
 are in place the service is reachable over HTTPS.

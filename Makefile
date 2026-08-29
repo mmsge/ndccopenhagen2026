@@ -8,7 +8,7 @@ help:        ## Show this help
 
 # ── Server (Docker Compose) ───────────────────────────────────────────────────
 # On the Hetzner box the repo lives at /srv/thegoodtimes.
-# Caddy (in the hetzner-server repo) proxies thegoodtimes.msge.no → 4008.
+# Caddy (in the naustet-server repo) proxies thegoodtimes.msge.no → 4008.
 
 deploy:      ## Pull latest code, rebuild image, and restart (run on server)
 	git pull --ff-only

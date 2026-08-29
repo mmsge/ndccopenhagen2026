@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 // Site-level created/modified JSON-LD, from git history (see
 // src/lib/page-dates.ts / scripts/generate-page-dates.sh). Same pattern as
-// msge-no (ADR 0004) and hetzner-server (ADR 0015). `article:*` isn't
+// msge-no (ADR 0004) and naustet-server (ADR 0015). `article:*` isn't
 // representable via the typed Metadata `openGraph` fields without also
 // claiming og:type=article, so it's rendered directly — React hoists
 // <meta>/<script> tags into <head> regardless of where they render.
