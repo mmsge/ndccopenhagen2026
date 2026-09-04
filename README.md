@@ -69,3 +69,39 @@ make dev       # local hot-reload dev server (no Docker)
 
 Open the site and click **"Run the Presses"** to fetch the first batch of
 articles. The SQLite database persists across rebuilds via the `./data` volume.
+
+## Ops endpoints
+
+Three fixed, unauthenticated paths, per the box-wide contract
+(`naustet-server/docs/health-and-version-contract.md`, ADR 0022). They live at the
+**root**, not under `/api/`, and are `Disallow`ed in `robots.txt`.
+
+| Path | Answers | Response |
+|------|---------|----------|
+| `/healthz` | Is the process alive? | `200 text/plain`, body exactly `ok` (2 bytes, no newline). Dependency-free — this is what the Compose `healthcheck:` byte-compares. |
+| `/version` | Which commit is *actually* running? | `200 application/json` — the identity of the **image**, baked in at deploy. |
+| `/health` | Is it working, and if not, which part? | `application/json`; `200` for `ok`/`degraded`, `503` only for `error`. |
+
+All three send `Cache-Control: no-store`.
+
+`/version` reads `build-info.json`, written on the checkout by
+`scripts/generate-build-info.sh` **before** the image build (`make deploy`) and
+copied into the image as the Dockerfile's last `COPY`. That ordering is the point:
+a `git pull` that isn't followed by a rebuild leaves the container serving — and
+reporting — the older commit. With no `build-info.json` the endpoint reports
+`{"source": "unknown"}` with null fields; that is not an error.
+
+`/health` reports a **closed vocabulary** of check names — nothing else ever
+appears, and no paths, hostnames, ports, env vars, SQL, dependency versions or
+exception text go in the response:
+
+| `checks[].name` | What it proves |
+|---|---|
+| `database` | a real `count(*)` against SQLite on the mounted volume, with `latency_ms` and a row count |
+| `ingest` | `age_seconds` since the newest article fetch — catches feeds that quietly stopped refreshing (`degraded` past 7 days) |
+| `render` | the built client assets are present in the image — `next start` boots happily on a half-built `.next` while every page 404s its JS/CSS |
+
+```bash
+make verify                       # probe all three on 127.0.0.1:4008
+make verify VERIFY_URL=https://thegoodtimes.msge.no
+```

@@ -21,7 +21,14 @@ services:
       # SQLite state persists across rebuilds. Dir mount so WAL siblings work.
       - ./data:/data
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4008/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      # /healthz, NEVER /health: this restarts the container on failure, and
+      # /health answers "is a dependency degraded?" — pointing the healthcheck
+      # at it would restart-loop the app whenever the feeds go quiet.
+      # 127.0.0.1, not "localhost": localhost can resolve to ::1 while the
+      # server listens on IPv4 only.
+      # The body is byte-compared — a 200 carrying an error/HTML shell would
+      # otherwise pass. The contract fixes the body at exactly "ok" (2 bytes).
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:4008/healthz',r=>{let b='';r.on('data',c=>b+=c);r.on('end',()=>process.exit(r.statusCode===200&&b==='ok'?0:1))}).on('error',()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
