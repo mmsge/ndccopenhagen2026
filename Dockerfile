@@ -1,10 +1,17 @@
 # The Good Times — production image for the Hetzner server.
 #
-# Single Debian-based stage so the native `better-sqlite3` binary is compiled
-# against the same glibc it runs on. Dev dependencies are pruned after the
-# build, so the final image carries only what `next start` needs at runtime.
+# Two stages. The build stage carries the toolchain that compiles the native
+# `better-sqlite3` addon plus every devDependency `next build` needs; the runtime
+# stage starts from a clean slim base and copies the finished, pruned tree across.
+#
+# Why two stages when one stage already ran `npm prune --omit=dev`: image layers
+# are additive. A file deleted in a later layer is still stored in the earlier
+# one, so the single-stage image kept the full devDependency install, the g++
+# toolchain and Next's compiler cache underneath the prune and weighed 1.6 GB on
+# a box with a 40 GB disk. Copying the pruned tree into a fresh stage is what
+# actually drops them.
 
-FROM node:22-bookworm-slim
+FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
@@ -20,17 +27,30 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Build the app, then drop dev-only dependencies (tailwind, typescript, …).
+# Build the app, drop dev-only dependencies (tailwind, typescript, …), and drop
+# `.next/cache`: it is the compiler's incremental cache, worthless at runtime
+# and often larger than the build it produced.
 COPY . .
 RUN npm run build \
-  && npm prune --omit=dev
+  && npm prune --omit=dev \
+  && rm -rf .next/cache
 
-# Runtime config. NODE_ENV flips to production only now — after the build —
-# so `next start` runs in production mode without starving the build of dev deps.
-# SQLite lives on a mounted volume; see docker-compose.yml.
-ENV NODE_ENV=production \
+FROM node:22-bookworm-slim
+
+WORKDIR /app
+
+# Runtime config. NODE_ENV is production only here, after the build, so `next
+# start` runs in production mode without the build having been starved of dev
+# deps. SQLite lives on a mounted volume; see docker-compose.yml.
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production \
     PORT=4008 \
     GOODNEWS_DB=/data/goodnews.db
+
+# The whole pruned tree, so the runtime sees exactly the files the single-stage
+# image did (src/, public/, scripts/, the compiled addon in node_modules), minus
+# the toolchain and the layers underneath the prune.
+COPY --from=build /app /app
 RUN mkdir -p /data
 
 EXPOSE 4008
