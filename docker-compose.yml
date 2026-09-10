@@ -12,6 +12,18 @@ services:
     build: .
     container_name: thegoodtimes
     restart: unless-stopped
+    # Next.js 16 (`next start`) + better-sqlite3: the box template default for a Node
+    # app. The RSS ingest walks the six feeds one at a time and the sentiment scorer
+    # is an AFINN word list, not an ML runtime, so nothing here needs more. Next.js is
+    # heavier than Express, though: if the container ever shows OOMKilled, raise this
+    # to 384m (lesesalen runs there). The box is small (3.7 GB / 2 vCPU), always cap memory.
+    mem_limit: 256m
+    # Cap the container log: json-file never rotates on its own, and 10m x 3 is also how much output survives an outage of the central log collector (naustet-server ADR 0032).
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "0.0.0.0:4008:4008"
     environment:
